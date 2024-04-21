@@ -1,9 +1,7 @@
 import { clsx } from 'clsx';
-
 import arrow from 'src/images/arrow.svg';
 
 import styles from './ArrowButton.module.scss';
-import { forwardRef } from 'react';
 
 /** Функция для обработки открытия/закрытия формы */
 export type OnClick = () => void;
@@ -13,7 +11,7 @@ type TProps = {
 	open: boolean;
 };
 
-export const ArrowButton = forwardRef<HTMLDivElement, TProps>((props, ref) => {
+export const ArrowButton = ({ onClick, open }: TProps) => {
 	return (
 		/* Не забываем указаывать role и aria-label атрибуты для интерактивных элементов */
 		<div
@@ -21,18 +19,14 @@ export const ArrowButton = forwardRef<HTMLDivElement, TProps>((props, ref) => {
 			aria-label='Открыть/Закрыть форму параметров статьи'
 			tabIndex={0}
 			className={clsx(styles.container, {
-				[styles.container_open]: props.open,
+				[styles.container_open]: open,
 			})}
-			onClick={props.onClick}
-			ref={ref}>
+			onClick={onClick}>
 			<img
 				src={arrow}
 				alt='иконка стрелочки'
-				className={clsx(styles.arrow, { [styles.arrow_open]: props.open })}
+				className={clsx(styles.arrow, { [styles.arrow_open]: open })}
 			/>
 		</div>
 	);
-});
-
-// Явно уазываем имя компонента
-ArrowButton.displayName = 'ArrowButton';
+};

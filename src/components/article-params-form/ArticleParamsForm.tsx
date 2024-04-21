@@ -1,4 +1,4 @@
-import { SyntheticEvent, useLayoutEffect, useRef, useState } from 'react';
+import { SyntheticEvent, useRef, useState } from 'react';
 
 import { clsx } from 'clsx';
 
@@ -18,59 +18,44 @@ import { Text } from '../text';
 import { Select } from '../select';
 import { Separator } from '../separator';
 import { RadioGroup } from '../radio-group';
+import { useClose } from './hooks/useClose';
 import styles from './ArticleParamsForm.module.scss';
 
 type TProps = {
-	setState: (value: ArticleStateType) => void;
+	setArticleState: (value: ArticleStateType) => void;
 };
 
-export const ArticleParamsForm = ({ setState }: TProps) => {
+export const ArticleParamsForm = ({ setArticleState }: TProps) => {
 	const [open, setOpen] = useState<boolean>(false);
 
 	// Состояние параметров формы
-	const [selectedOpt, setSelectedOpt] =
+	const [formState, setFormState] =
 		useState<ArticleStateType>(defaultArticleState);
 
 	// Refs для элементов
 	const sidebarRef = useRef<HTMLElement | null>(null);
-	const rowBtnRef = useRef<HTMLDivElement | null>(null);
 
 	// Хендлеры
 	const handleSubmit = (e: SyntheticEvent) => {
 		e.preventDefault();
-		setState(selectedOpt);
+		setArticleState(formState);
 	};
 
 	const handleReset = () => {
-		setState(defaultArticleState);
-		setSelectedOpt(defaultArticleState);
+		setArticleState(defaultArticleState);
+		setFormState(defaultArticleState);
 	};
 
-	const handleClickOutside = (e: MouseEvent) => {
-		if (
-			!rowBtnRef.current?.contains(e.target as Node) &&
-			!sidebarRef.current?.contains(e.target as Node)
-		) {
-			setOpen(false);
-		}
-	};
-
-	useLayoutEffect(() => {
-		if (open) {
-			document.addEventListener('click', handleClickOutside);
-		} else {
-			document.removeEventListener('click', handleClickOutside);
-		}
-
-		// В случае если в дальнейшем его будут демонтировать то же убираем слушатель
-		return () => {
-			document.removeEventListener('click', handleClickOutside);
-		};
-	}, [open]);
+	// Хук для ивентов закрытия сайдбара
+	useClose({
+		isOpen: open,
+		onClose: () => setOpen(false),
+		rootRef: sidebarRef,
+	});
 
 	return (
 		<>
-			<ArrowButton onClick={() => setOpen(!open)} open={open} ref={rowBtnRef} />
+			<ArrowButton onClick={() => setOpen(!open)} open={open} />
 			<aside
 				className={clsx(styles.container, { [styles.container_open]: open })}
 				ref={sidebarRef}>
@@ -82,13 +67,13 @@ export const ArticleParamsForm = ({ setState }: TProps) => {
 					{/* Выбор шрифта */}
 					<Select
 						onChange={(option) =>
-							setSelectedOpt({
-								...selectedOpt,
+							setFormState({
+								...formState,
 								fontFamilyOption: option,
 							})
 						}
 						options={fontFamilyOptions}
-						selected={selectedOpt.fontFamilyOption}
+						selected={formState.fontFamilyOption}
 						title='шрифт'
 					/>
 
@@ -96,26 +81,26 @@ export const ArticleParamsForm = ({ setState }: TProps) => {
 					<RadioGroup
 						name='font'
 						onChange={(option) =>
-							setSelectedOpt({
-								...selectedOpt,
+							setFormState({
+								...formState,
 								fontSizeOption: option,
 							})
 						}
 						options={fontSizeOptions}
-						selected={selectedOpt.fontSizeOption}
+						selected={formState.fontSizeOption}
 						title='размер шрифта'
 					/>
 
 					{/* Выбор цвета шрифта */}
 					<Select
 						onChange={(option) =>
-							setSelectedOpt({
-								...selectedOpt,
+							setFormState({
+								...formState,
 								fontColor: option,
 							})
 						}
 						options={fontColors}
-						selected={selectedOpt.fontColor}
+						selected={formState.fontColor}
 						title='цвет шрифта'
 					/>
 
@@ -125,26 +110,26 @@ export const ArticleParamsForm = ({ setState }: TProps) => {
 					{/* Выбор цвета страницы */}
 					<Select
 						onChange={(option) =>
-							setSelectedOpt({
-								...selectedOpt,
+							setFormState({
+								...formState,
 								backgroundColor: option,
 							})
 						}
 						options={backgroundColors}
-						selected={selectedOpt.backgroundColor}
+						selected={formState.backgroundColor}
 						title='цвет фона'
 					/>
 
 					{/* Выбор ширины контента */}
 					<Select
 						onChange={(option) =>
-							setSelectedOpt({
-								...selectedOpt,
+							setFormState({
+								...formState,
 								contentWidth: option,
 							})
 						}
 						options={contentWidthArr}
-						selected={selectedOpt.contentWidth}
+						selected={formState.contentWidth}
 						title='ширина контента'
 					/>
 
