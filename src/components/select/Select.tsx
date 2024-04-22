@@ -25,6 +25,7 @@ export const Select = (props: SelectProps) => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const rootRef = useRef<HTMLDivElement>(null);
 	const placeholderRef = useRef<HTMLDivElement>(null);
+	const dropdownRef = useRef<HTMLUListElement>(null);
 
 	useOutsideClickClose({
 		isOpen,
@@ -42,8 +43,16 @@ export const Select = (props: SelectProps) => {
 		setIsOpen(false);
 		onChange?.(option);
 	};
+
 	const handlePlaceHolderClick: MouseEventHandler<HTMLDivElement> = () => {
 		setIsOpen((isOpen) => !isOpen);
+	};
+
+	const handleClickInsideDropdown: MouseEventHandler<HTMLDivElement> = (e) => {
+		if (dropdownRef.current?.contains(e.target as Node)) {
+			// Если клик произошел внутри списка опций, предотвращаем цепочку дейсвтий
+			e.stopPropagation();
+		}
 	};
 
 	return (
@@ -59,7 +68,8 @@ export const Select = (props: SelectProps) => {
 				className={styles.selectWrapper}
 				ref={rootRef}
 				data-is-active={isOpen}
-				data-testid='selectWrapper'>
+				data-testid='selectWrapper'
+				onClick={handleClickInsideDropdown}>
 				<img
 					src={arrowDown}
 					alt='иконка стрелочки'
@@ -86,7 +96,11 @@ export const Select = (props: SelectProps) => {
 					</Text>
 				</div>
 				{isOpen && (
-					<ul className={styles.select} data-testid='selectDropdown'>
+					<ul
+						className={styles.select}
+						data-testid='selectDropdown'
+						ref={dropdownRef}
+						onClick={(e) => e.stopPropagation()}>
 						{options
 							.filter((option) => selected?.value !== option.value)
 							.map((option) => (
